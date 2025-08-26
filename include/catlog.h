@@ -1,4 +1,6 @@
 //
+// Created by 22723 on 25-8-26.
+// 可以在windows和linux下使用
 // MIT License
 // Copyright © 2025 HatsukiYukina
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -6,36 +8,39 @@
 // THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-//注意：本项目使用的非内置头文件全部放在/include下
-#include "include/cJSON.h"
-#include "include/configreader.h"
-#include "include/catlog.h"
-#include "include/temperature.h"
+#ifndef CATLOG_H
+#define CATLOG_H
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <time.h>
+//#include <unistd.h>
 
-int main(void) {
-    enable_file_logging("latest.log"); //启动并指定文件名
-    logmessage(1,"将读取/etc/ctmt/config.json\n");
-    AppConfig* config = read_app_config("/etc/ctmt/config.json"); //我是硬编码仙人
-    //config大检查
-    if (!config) {
-        fprintf(stderr, "\n");
-        logmessage(3,"无法读取config\n");
-        return 1;
-    }
-    set_log_level(1);
-    //输出一遍参数
-    print_app_config(config);
-    //读取
-    float raw_temp = read_cpu_temperature(config);
-    if (raw_temp >= 0) {
-        float real_temp = calculate_real_temperature(raw_temp, config->multiple);
-        print_temperature_info(real_temp);
-    }
-    //释放配置文件
-    free_app_config(config);
+//日志等级
+enum {
+    CATLOG_DEBUG = 0,
+    CATLOG_INFO  = 1,
+    CATLOG_WARN  = 2,
+    CATLOG_ERROR = 3,
+    CATLOG_FATAL = 4
+};
 
-    return 0;
-}
+//函数声明
+void logmessage(int level, const char* format, ...);
+void set_log_level(int level);
+int get_log_level(void);
+const char* get_log_level_name(int level);
+
+void enable_file_logging(const char* filename);
+void disable_file_logging(void);
+void set_log_file(const char* filename);
+int is_file_logging_enabled(void);
+
+//宏定义
+#define LOG_DEBUG(...) logmessage(CATLOG_DEBUG, __VA_ARGS__)
+#define LOG_INFO(...)  logmessage(CATLOG_INFO, __VA_ARGS__)
+#define LOG_WARN(...)  logmessage(CATLOG_WARN, __VA_ARGS__)
+#define LOG_ERROR(...) logmessage(CATLOG_ERROR, __VA_ARGS__)
+#define LOG_FATAL(...) logmessage(CATLOG_FATAL, __VA_ARGS__)
+
+#endif //CATLOG_H

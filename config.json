@@ -1,0 +1,10 @@
+{
+  "temperature": {
+    "path": "/sys/class/thermal/thermal_zone0/temp",
+    "multiple": 0.001
+  },
+  "settings": {
+    "check_interval": 3,
+    "log_file": "temperature.log"
+  }
+}

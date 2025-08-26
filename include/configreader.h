@@ -1,41 +1,32 @@
 //
+// Created by CAT on 25-8-26.
 // MIT License
 // Copyright © 2025 HatsukiYukina
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 // THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+//
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-//注意：本项目使用的非内置头文件全部放在/include下
-#include "include/cJSON.h"
-#include "include/configreader.h"
-#include "include/catlog.h"
-#include "include/temperature.h"
+#ifndef CONFIGREADER_H
+#define CONFIGREADER_H
+//变量加在这
+typedef struct {
+    char* temperature_path;  //温度文件路径
+    float multiple;          //倍率
+    int check_interval;      //检查间隔（秒）
+    int logcsv_enable;         //是否启用csv日志
+    char* log_file;          //日志文件路径
+} AppConfig;
 
-int main(void) {
-    enable_file_logging("latest.log"); //启动并指定文件名
-    logmessage(1,"将读取/etc/ctmt/config.json\n");
-    AppConfig* config = read_app_config("/etc/ctmt/config.json"); //我是硬编码仙人
-    //config大检查
-    if (!config) {
-        fprintf(stderr, "\n");
-        logmessage(3,"无法读取config\n");
-        return 1;
-    }
-    set_log_level(1);
-    //输出一遍参数
-    print_app_config(config);
-    //读取
-    float raw_temp = read_cpu_temperature(config);
-    if (raw_temp >= 0) {
-        float real_temp = calculate_real_temperature(raw_temp, config->multiple);
-        print_temperature_info(real_temp);
-    }
-    //释放配置文件
-    free_app_config(config);
 
-    return 0;
-}
+//函数声明
+AppConfig* read_app_config(const char* config_file);
+void free_app_config(AppConfig* config);
+void print_app_config(const AppConfig* config);
+
+float read_cpu_temperature(const AppConfig* config);
+float calculate_real_temperature(float raw_value, float multiple);
+void print_temperature_info(float temperature);
+
+#endif //CONFIGREADER_H
