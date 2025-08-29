@@ -5,6 +5,8 @@
   },
   "settings": {
     "check_interval": 3,
-    "log_file": "temperature.log"
+    "logcsv_enable": 1,
+    "log_file": "main.log",
+    "csv_file": "temp.csv"
   }
 }

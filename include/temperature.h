@@ -6,9 +6,7 @@
 #define TEMPERATURE_H
 #include "configreader.h"
 
-//温度函数
 float read_cpu_temperature(const AppConfig* config);
-float calculate_real_temperature(float raw_value, float multiple);
-void print_temperature_info(float temperature);
+float calculate_real_temperature(float raw_temperature, float multiple);
 
 #endif //TEMPERATURE_H

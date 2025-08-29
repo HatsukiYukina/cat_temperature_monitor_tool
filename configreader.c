@@ -99,7 +99,8 @@ AppConfig* read_app_config(const char* config_file) {
     config->multiple = 0.001f;
     config->check_interval = 5;
     config->logcsv_enable = 1;
-    config->log_file = NULL;
+    config->log_file = "latest.log";
+    config->csv_file = "/var/log/ctmt/temp.csv";
 
     //解析temperature
     cJSON* temperature = cJSON_GetObjectItemCaseSensitive(json, "temperature");
@@ -114,6 +115,7 @@ AppConfig* read_app_config(const char* config_file) {
         config->check_interval = get_json_int(settings, "check_interval", 5);
         config->logcsv_enable = get_json_int(settings, "logcsv_enable", 1);
         config->log_file = get_json_string(settings, "log_file", NULL);
+        config->csv_file = get_json_string(settings, "csv_file", NULL);
     }
 
     cJSON_Delete(json);
@@ -134,6 +136,7 @@ void free_app_config(AppConfig* config) {
     if (config) {
         free(config->temperature_path);
         free(config->log_file);
+        free(config->csv_file);
         free(config);
     }
 }
@@ -149,7 +152,5 @@ void print_app_config(const AppConfig* config) {
     LOG_INFO("系统温度文件路径: %s\n", config->temperature_path);
     LOG_INFO("转换倍率: %.6f\n", config->multiple);
     LOG_INFO("温度检查间隔: %d秒\n", config->check_interval);
-    if (config->log_file) {
-        LOG_INFO("日志文件: %s\n", config->log_file);
-    }
+    LOG_INFO("程序日志文件: %s\n", config->log_file);
 }

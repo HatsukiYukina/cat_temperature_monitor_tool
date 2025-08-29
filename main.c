@@ -13,7 +13,8 @@
 #include "include/cJSON.h"
 #include "include/configreader.h"
 #include "include/catlog.h"
-#include "include/temperature.h"
+#include "include/monitor.h"
+#include "include/csvlogger.h"
 
 int main(void) {
     enable_file_logging("latest.log"); //启动并指定文件名
@@ -28,13 +29,32 @@ int main(void) {
     set_log_level(1);
     //输出一遍参数
     print_app_config(config);
-    //读取
-    float raw_temp = read_cpu_temperature(config);
-    if (raw_temp >= 0) {
-        float real_temp = calculate_real_temperature(raw_temp, config->multiple);
-        print_temperature_info(real_temp);
+    //初始化csv
+    if (config->logcsv_enable && config->csv_file) {  // 改为使用 config->csv_file
+        if (init_csv_file(config->csv_file)) {
+            LOG_INFO("温度日志文件: %s\n", config->csv_file);
+        }
     }
-    //释放配置文件
+    //启动监控循环
+    start_temperature_monitor(config);
+    //输出统计数据
+    print_csv_stats();
+    CSVRecord specific_record;
+    if (read_csv_line(114, &specific_record)) {  // 读取第5行
+        LOG_INFO("第114条记录: %s - %.2f°C\n",
+                 specific_record.datetime,
+                 specific_record.temperature);
+    }
+    //输出最后记录
+    CSVRecord last_record;
+    if (read_last_csv_line(&last_record)) {
+        LOG_INFO("最后记录: %s - %.2f°C (%s)\n",
+                 last_record.datetime,
+                 last_record.temperature,
+                 last_record.status);
+    }
+    //释放配置文件和csv文件
+    close_csv_file();
     free_app_config(config);
 
     return 0;
