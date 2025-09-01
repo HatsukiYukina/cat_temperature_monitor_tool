@@ -1,5 +1,9 @@
 // Created by 22674 on 2025/8/30.
 
+#ifndef CPU_KILLER_DETECT_C
+#define CPU_KILLER_DETECT_C
+
+
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
@@ -25,7 +29,8 @@ typedef struct {
 static unsigned long long get_total_cpu_time(void) {
     FILE *fp = fopen("/proc/stat", "r");
     if (!fp) {
-        perror("fopen /proc/stat failed");
+        //开文件失败了！
+        logmessage(CATLOG_ERROR,"fopen /proc/stat failed");
         return 0;
     }
 
@@ -44,6 +49,7 @@ static unsigned long long get_total_cpu_time(void) {
 // 返回值：0=成功，-1=失败
 static int get_process_cpu_time(pid_t pid, unsigned long long *utime, unsigned long long *stime, char *comm) {
     char proc_path[64];
+    //向proc_path里面塞字符数据
     snprintf(proc_path, sizeof(proc_path), "/proc/%d/stat", pid);
 
     FILE *fp = fopen(proc_path, "r");
@@ -214,3 +220,5 @@ pid_t kill_highest_cpu_process(void) {
 
     return target_pid;
 }
+
+#endif
