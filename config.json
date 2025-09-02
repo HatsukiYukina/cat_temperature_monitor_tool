@@ -8,5 +8,11 @@
     "logcsv_enable": 1,
     "log_file": "main.log",
     "csv_file": "temp.csv"
+  },
+  "onebot": {
+    "websocket_enable": 1,
+    "websocket_url": "",
+    "access_token" : "",
+    "reconnect_interval": 50
   }
 }
