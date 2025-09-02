@@ -10,16 +10,20 @@
 #include <stdlib.h>
 #include <string.h>
 //注意：本项目使用的非内置头文件全部放在/include下
+#include <unistd.h>
 #include "include/cJSON.h"
 #include "include/configreader.h"
 #include "include/catlog.h"
+#include "include/cat_httpsender.h"
 #include "include/monitor.h"
 #include "include/csvlogger.h"
+
 
 int main(void) {
     enable_file_logging("latest.log"); //启动并指定文件名
     logmessage(1,"将读取/etc/ctmt/config.json\n");
     AppConfig* config = read_app_config("/etc/ctmt/config.json"); //我是硬编码仙人
+    HTTPSender* http_sender = http_sender_init(config);
     //config大检查
     if (!config) {
         fprintf(stderr, "\n");
@@ -35,6 +39,8 @@ int main(void) {
             LOG_INFO("温度日志文件: %s\n", config->csv_file);
         }
     }
+
+
     //启动监控循环
     start_temperature_monitor(config);
     //输出统计数据

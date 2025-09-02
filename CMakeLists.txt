@@ -9,6 +9,7 @@ add_library(catlog STATIC catlog.c)
 add_library(csvlogger STATIC csvlogger.c)
 add_library(monitor STATIC monitor.c)
 add_library(temperature STATIC temperature.c)
+add_library(onebot STATIC cat_httpsender.c)
 add_executable(cat_temperature_monitor_tool main.c
         include/configreader.h
         configreader.c
@@ -20,6 +21,9 @@ add_executable(cat_temperature_monitor_tool main.c
         monitor.c
         include/temperature.h
         temperature.c
+        include/cat_httpsender.h
+        cat_httpsender.c
+        thread_manager.c
 )
 
 target_link_libraries(cat_temperature_monitor_tool
@@ -29,6 +33,9 @@ target_link_libraries(cat_temperature_monitor_tool
         csvlogger
         monitor
         temperature
+        ssl
+        crypto
+        curl
 )
 
 

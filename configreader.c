@@ -101,6 +101,10 @@ AppConfig* read_app_config(const char* config_file) {
     config->logcsv_enable = 1;
     config->log_file = "latest.log";
     config->csv_file = "/var/log/ctmt/temp.csv";
+    config->httpsend_enable = 0;
+    config->http_url = "http://localhost:8080";
+    config->access_token = NULL;
+
 
     //解析temperature
     cJSON* temperature = cJSON_GetObjectItemCaseSensitive(json, "temperature");
@@ -116,6 +120,13 @@ AppConfig* read_app_config(const char* config_file) {
         config->logcsv_enable = get_json_int(settings, "logcsv_enable", 1);
         config->log_file = get_json_string(settings, "log_file", NULL);
         config->csv_file = get_json_string(settings, "csv_file", NULL);
+    }
+    //解析onebothttp设置
+    cJSON* onebot_http = cJSON_GetObjectItemCaseSensitive(json, "onebot_http");
+    if (cJSON_IsObject(onebot_http)) {
+        config->httpsend_enable = get_json_int(onebot_http, "httpsend_enable", 1);
+        config->http_url = get_json_string(onebot_http, "http_url", NULL);
+        config->access_token = get_json_string(onebot_http, "access_token", NULL);
     }
 
     cJSON_Delete(json);
@@ -148,9 +159,9 @@ void print_app_config(const AppConfig* config) {
         return;
     }
 
-    LOG_INFO("==========读取的配置==========\n");
-    LOG_INFO("系统温度文件路径: %s\n", config->temperature_path);
-    LOG_INFO("转换倍率: %.6f\n", config->multiple);
-    LOG_INFO("温度检查间隔: %d秒\n", config->check_interval);
-    LOG_INFO("程序日志文件: %s\n", config->log_file);
+    LOG_INFO("温度监控->系统温度文件路径: %s\n", config->temperature_path);
+    LOG_INFO("温度监控->转换倍率: %.6f\n", config->multiple);
+    LOG_INFO("温度监控->温度检查间隔: %ds\n", config->check_interval);
+    LOG_INFO("温度监控->程序日志文件: %s\n", config->log_file);
+    LOG_INFO("温度监控->温度日志文件: %s\n", config->csv_file);
 }

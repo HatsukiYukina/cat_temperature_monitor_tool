@@ -12,17 +12,18 @@
 #define CONFIGREADER_H
 //变量加在这
 typedef struct {
+    //temperature object
     char* temperature_path;  //温度文件路径
     float multiple;          //倍率
+    //settings object
     int check_interval;      //检查间隔（秒）
     int logcsv_enable;         //是否启用csv日志
     char* log_file;          //日志文件路径
     char* csv_file;         //csv记录表路径
-
-    int websocket_enable;    //启用WebSocket
-    char* websocket_url;     //WebSocket地址
+    //onebothttp object
+    int httpsend_enable;    //启用onebot http
+    char* http_url;     //http址
     char* access_token;      //访问令牌
-    int reconnect_interval;  //重连间隔(秒)
 } AppConfig;
 
 
@@ -33,6 +34,7 @@ void print_app_config(const AppConfig* config);
 
 //float read_cpu_temperature(const AppConfig* config);
 //float calculate_real_temperature(float raw_value, float multiple);
+//我警告你，注释掉的代码肯定有原因，不要随便动
 void print_temperature_info(float temperature);
 
 #endif //CONFIGREADER_H
