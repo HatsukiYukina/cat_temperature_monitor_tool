@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "cpu_killer_detect.c"
+
 static MonitorState monitor_state = {0};
 
 //信号处理函数
@@ -60,20 +62,30 @@ static void check_temperature(const AppConfig* config) {
         //可以在这里添加条件和执行代码，下同
     }
     else if (real_temp < 60.0f) {
+
     }
     else if (real_temp < 80.0f) {
         monitor_state.alert_count++;
+        //这是给干到60~80度了
     }
     else {
+        //大于60度的警告次数++
         monitor_state.alert_count++;
 
         //如果超过最大温度限制
         if (real_temp > monitor_state.max_temperature) {
             LOG_ERROR("温度超过安全限制 (%d°C)\n", monitor_state.max_temperature);
+            monitor_state.alert_burn_count ++;
+            kill_highest_cpu_process();
         }
+        if (monitor_state.alert_count > monitor_state.alert_burn_count_max) {
+            kill_highest_cpu_process();
+        }
+
     }
 
     //定期报告统计信息，底下那个数能改
+    //每10次大于60度就报告1次
     if (monitor_state.alert_count > 0 && monitor_state.alert_count % 10 == 0) {
         LOG_WARN("已记录 %d 次温度警报\n", monitor_state.alert_count);
     }
@@ -101,6 +113,8 @@ void start_temperature_monitor(AppConfig* config) {
     monitor_state.interval = config->check_interval;
     monitor_state.alert_count = 0;
     monitor_state.max_temperature = 85;  // 默认85°C
+    monitor_state.alert_burn_count = 0;// 警报处理后依然保持的警报次数
+    monitor_state.alert_burn_count_max = 400;// 进行二次杀进程所需的警报次数
 
     int init_csv_file(const char* );
     //设置信号处理

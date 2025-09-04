@@ -47,7 +47,7 @@ int main(void) {
     print_csv_stats();
     CSVRecord specific_record;
     if (read_csv_line(114, &specific_record)) {  // 读取第5行
-        LOG_INFO("第114条记录: %s - %.2f°C\n",
+        LOG_INFO("第114条记录: %s - %.2f°C\n",//?喵喵喵
                  specific_record.datetime,
                  specific_record.temperature);
     }
