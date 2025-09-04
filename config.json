@@ -1,7 +1,10 @@
 {
   "temperature": {
     "path": "/sys/class/thermal/thermal_zone0/temp",
-    "multiple": 0.001
+    "multiple": 0.001,
+    "normal_temp": 50.00,
+    "warm_temp": 65.00,
+    "hot_temp": 80.00
   },
   "settings": {
     "check_interval": 3,
@@ -9,10 +12,18 @@
     "log_file": "main.log",
     "csv_file": "temp.csv"
   },
-  "onebot": {
-    "websocket_enable": 1,
-    "websocket_url": "",
-    "access_token" : "",
-    "reconnect_interval": 50
+  "onebot_http": {
+    "httpsend_enable": 1,
+    "http_url": "http://192.168.1.126:8884",
+    "access_token" : "catcatcat"
+  },
+  "killer": {
+    "killer_enable": 1,
+    "max_temperature": 85,
+    "alert_burn_count_max": 400,
+    "reboot_max_temperature": 90,
+    "kill_alert_count": 5,
+    "kill_retry_count": 2,
+    "host_name": "baka9"
   }
 }

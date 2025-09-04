@@ -31,15 +31,15 @@ int main(void) {
         return 1;
     }
     set_log_level(1);
+    logmessage(2,"\033[31m请不要将日志文件或终端输出截图发送给您不信任的人，终端可能含有token等敏感信息！\n");
     //输出一遍参数
     print_app_config(config);
     //初始化csv
     if (config->logcsv_enable && config->csv_file) {  // 改为使用 config->csv_file
         if (init_csv_file(config->csv_file)) {
-            LOG_INFO("温度日志文件: %s\n", config->csv_file);
+        //    LOG_INFO("温度日志文件: %s\n", config->csv_file);
         }
     }
-
 
     //启动监控循环
     start_temperature_monitor(config);
@@ -59,9 +59,8 @@ int main(void) {
                  last_record.temperature,
                  last_record.status);
     }
-    //释放配置文件和csv文件
+    //释放csv文件
     close_csv_file();
-    free_app_config(config);
 
     return 0;
 }

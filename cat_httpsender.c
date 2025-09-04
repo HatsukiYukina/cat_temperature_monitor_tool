@@ -37,7 +37,7 @@ HTTPSender* http_sender_init(AppConfig* config) {
         sender->access_token[0] = '\0';
     }
 
-    LOG_INFO("输入http地址: %s", sender->http_url);
+    //LOG_INFO("输入http地址: %s", sender->http_url);
     return sender;
 }
 
