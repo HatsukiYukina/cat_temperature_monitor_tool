@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include "include/catlog.h"
+#include "include/cat_httpsender.h"
+#include "include/configreader.h"
 
 // 进程信息结构体：存储PID、CPU使用率、进程名
 typedef struct {

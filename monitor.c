@@ -44,11 +44,11 @@ static void check_temperature(const AppConfig* config) {
 
     if (is_csv_enabled()) {
         const char* status;
-        if (real_temp < 40.0f) {
+        if (real_temp < config->normal_temp) {
             status = "NORMAL";
-        } else if (real_temp < 60.0f) {
+        } else if (real_temp < config->warm_temp) {
             status = "WARM";
-        } else if (real_temp < 80.0f) {
+        } else if (real_temp < config->hot_temp) {
             status = "HOT";
         } else {
             status = "CRITICAL";
@@ -58,18 +58,17 @@ static void check_temperature(const AppConfig* config) {
     }
 
     //温度检查
-    if (real_temp < 40.0f) {
+    if (real_temp < config->normal_temp) {
         //可以在这里添加条件和执行代码，下同
     }
-    else if (real_temp < 60.0f) {
+    else if (real_temp < config->warm_temp) {
 
     }
-    else if (real_temp < 80.0f) {
+    else if (real_temp < config->hot_temp) {
         monitor_state.alert_count++;
-        //这是给干到60~80度了
     }
     else {
-        //大于60度的警告次数++
+        //大于WARM的警告次数++
         monitor_state.alert_count++;
 
         //如果超过最大温度限制
@@ -106,15 +105,15 @@ void start_temperature_monitor(AppConfig* config) {
     LOG_INFO("检查间隔: %d秒\n", config->check_interval);
     LOG_INFO("最大温度限制: %d°C\n", monitor_state.max_temperature);
     LOG_INFO("按 Ctrl+C 停止监控\n");
-    LOG_INFO("========================================\n");
 
     //初始化
+    //硬编码仙人太强大了难以战胜
     monitor_state.running = 1;
     monitor_state.interval = config->check_interval;
     monitor_state.alert_count = 0;
-    monitor_state.max_temperature = 85;  // 默认85°C
+    monitor_state.max_temperature = config->max_temperature;  // 默认85°C
     monitor_state.alert_burn_count = 0;// 警报处理后依然保持的警报次数
-    monitor_state.alert_burn_count_max = 400;// 进行二次杀进程所需的警报次数
+    monitor_state.alert_burn_count_max = config->alert_burn_count_max;// 进行二次杀进程所需的警报次数
 
     int init_csv_file(const char* );
     //设置信号处理
