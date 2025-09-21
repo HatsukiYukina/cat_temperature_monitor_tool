@@ -60,27 +60,47 @@ static void check_temperature(const AppConfig* config) {
     //温度检查
     if (real_temp < config->normal_temp) {
         //可以在这里添加条件和执行代码，下同
+        //在此温度条件下，双归零
+        monitor_state.alert_burn_count=0;
+        monitor_state.alert_count=0;
+
     }
     else if (real_temp < config->warm_temp) {
+        //在此温度条件下，双归零
+        monitor_state.alert_burn_count=0;
+        monitor_state.alert_count=0;
 
     }
     else if (real_temp < config->hot_temp) {
+        //进入警告区
+        monitor_state.alert_burn_count=0;
         monitor_state.alert_count++;
     }
     else {
+        //如果超过最大温度限制
         //大于WARM的警告次数++
         monitor_state.alert_count++;
+        if (real_temp < config->reboot_max_temperature) {
+            system_reboot_linux();
+        }
 
-        //如果超过最大温度限制
+
+        /*
+        //此处需要添加延时杀，可以用alert_burn_count改
         if (real_temp > monitor_state.max_temperature) {
             LOG_ERROR("温度超过安全限制 (%d°C)\n", monitor_state.max_temperature);
             monitor_state.alert_burn_count ++;
-            kill_highest_cpu_process();
-        }
-        if (monitor_state.alert_count > monitor_state.alert_burn_count_max) {
-            kill_highest_cpu_process();
+            //if (config->killer_enable)  kill_highest_cpu_process();
         }
 
+        //系统需要实现的目标改变，先注释掉吧~
+
+        //用于实现过温后的二次杀温
+        //需要添加白名单列表，如果指定pid的进程杀不掉，那就放弃杀
+        if (monitor_state.alert_count > monitor_state.alert_burn_count_max) {
+            if (config->killer_enable)  kill_highest_cpu_process();
+        }
+        */
     }
 
     //定期报告统计信息，底下那个数能改

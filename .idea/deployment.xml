@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData">
+    <serverData>
+      <paths name="cat_debian-12-x86 (6bed0d79-bb5f-4128-a9d9-cf69a4855b34)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.dQHbvLwiA8/cat_temperature_monitor_tool" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-cat_debian-12-x86" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

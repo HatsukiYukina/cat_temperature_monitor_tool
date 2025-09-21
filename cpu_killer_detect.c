@@ -15,9 +15,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/reboot.h>
 #include "include/catlog.h"
 #include "include/cat_httpsender.h"
 #include "include/configreader.h"
+
 
 // 进程信息结构体：存储PID、CPU使用率、进程名
 typedef struct {
@@ -164,9 +166,12 @@ static int get_sorted_processes(ProcessInfo *proc_list, int max_count) {
     return proc_count;
 }
 
+// 参数：
+//   whitelist - PID白名单列表指针
+//   whitelist_size - 白名单中PID的数量
 // 返回值：成功杀死的进程PID（>0）
 // 失败返回-1:最大占用进程为自身或者权限不足
-pid_t kill_highest_cpu_process(void) {
+pid_t kill_highest_cpu_process(const pid_t *whitelist, int whitelist_size) {
     // 假设系统最大进程数不超过4096（ARM Linux默认足够，可根据实际调整）
     #define MAX_PROCESSES 4096
     //用于存储进程的pid的列表
@@ -179,10 +184,26 @@ pid_t kill_highest_cpu_process(void) {
         return -1;
     }
 
-    // 2. 筛选CPU使用率>0的最高占用进程（排除空闲进程）
+    // 筛选CPU使用率>0且不在白名单中的最高占用进程
     pid_t target_pid = -1;
     for (int i = 0; i < proc_count; i++) {
-        if (proc_list[i].cpu_usage > 0.0) {
+        if (proc_list[i].cpu_usage <= 0.0) {
+            continue;
+        }
+
+        // 检查当前进程是否在白名单中
+        int is_whitelisted = 0;
+        for (int j = 0; j < whitelist_size; j++) {
+            if (proc_list[i].pid == whitelist[j]) {
+                is_whitelisted = 1;
+                logmessage(CATLOG_DEBUG,
+                          "进程 PID=%d（%s）在白名单中，跳过处理，CPU使用率=%.2f%%\n",
+                          proc_list[i].pid, proc_list[i].comm, proc_list[i].cpu_usage);
+                break;
+            }
+        }
+
+        if (!is_whitelisted) {
             target_pid = proc_list[i].pid;
             logmessage(CATLOG_INFO,
                 "最高CPU占用进程：PID=%d, 进程名=%s, CPU使用率=%.2f%%\n",
@@ -192,7 +213,7 @@ pid_t kill_highest_cpu_process(void) {
     }
 
     if (target_pid == -1) {
-        logmessage(CATLOG_ERROR, "未找到有效CPU占用进程，或许最大占用为当前进程或权限获取失败\n");
+        logmessage(CATLOG_ERROR, "未找到有效CPU占用进程，所有高占用进程可能都在白名单中\n");
         return -1;
     }
 
@@ -221,6 +242,32 @@ pid_t kill_highest_cpu_process(void) {
     }
 
     return target_pid;
+}
+
+int system_reboot_linux(void) {
+    //检查是否为 root 权限（普通用户无重启权限）
+    if (getuid() != 0) {
+        LOG_ERROR("系统重启失败：需 root 权限（当前为普通用户，uid=%d）\n", getuid());
+        return -1;
+    }
+
+    //同步文件系统：将内存中的缓存数据写入磁盘，避免数据丢失
+    LOG_WARN("即将重启系统，正在同步文件系统...\n");
+    sync();  // 阻塞调用，直到所有缓存数据写入完成
+
+    //调用底层 reboot() 系统调用触发重启
+    // RB_AUTOBOOT：Linux 标准重启参数，触发系统正常重启流程
+    int ret = reboot(RB_AUTOBOOT);
+
+    //若 reboot() 返回，说明调用失败（正常情况下触发后系统会直接重启，不会返回）
+    if (ret == -1) {
+        LOG_ERROR("系统重启命令执行失败：");
+        perror("reboot");  // 输出具体错误原因（如权限不足、系统不支持等）
+        return -1;
+    }
+
+    // 理论上不会执行到这里（重启触发后系统会终止进程）
+    return 0;
 }
 
 #endif
